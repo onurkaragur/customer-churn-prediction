@@ -1,0 +1,28 @@
+# Core
+pandas
+numpy
+
+# Visualization
+matplotlib
+seaborn
+
+# Machine Learning
+scikit-learn
+imbalanced-learn
+
+# Gradient Boosting Models
+xgboost
+lightgbm
+catboost
+
+# Experiment Tracking (optional but recommended)
+mlflow
+
+# Deployment (optional)
+streamlit
+fastapi
+uvicorn
+
+# Jupyter Notebooks
+jupyter
+ipykernel
