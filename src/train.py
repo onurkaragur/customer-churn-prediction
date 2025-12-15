@@ -1,8 +1,8 @@
 import os
-import pickle
 from pprint import pformat
 
 from config import DATA_PROCESSED, MODEL_DIR, MODEL_LOGREG, MODEL_RF, MODEL_XGB
+from utils import load_pickle, save_model
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -16,25 +16,24 @@ except Exception:
 
 
 def _load_processed(path=DATA_PROCESSED):
-	# If config points to an unexpected BASE_DIR, try a few sensible fallbacks
-	if os.path.exists(path):
-		with open(path, "rb") as f:
-			return pickle.load(f)
+	# Try standard load first
+	try:
+		return load_pickle(path)
+	except FileNotFoundError:
+		# try common project-relative locations from current working directory and parents
+		filename = os.path.basename(path)
+		candidates = []
+		cwd = os.getcwd()
+		for base in (cwd, os.path.dirname(cwd), os.path.dirname(os.path.dirname(cwd))):
+			candidates.append(os.path.join(base, "data", "processed", filename))
 
-	# try common project-relative locations from current working directory and parents
-	filename = os.path.basename(path)
-	candidates = []
-	cwd = os.getcwd()
-	for base in (cwd, os.path.dirname(cwd), os.path.dirname(os.path.dirname(cwd))):
-		candidates.append(os.path.join(base, "data", "processed", filename))
+		for candidate in candidates:
+			try:
+				return load_pickle(candidate)
+			except FileNotFoundError:
+				continue
 
-	for candidate in candidates:
-		if os.path.exists(candidate):
-			with open(candidate, "rb") as f:
-				return pickle.load(f)
-
-	# last resort: raise the original error with helpful message
-	raise FileNotFoundError(f"Processed data not found. Tried: {path} and {candidates}")
+		raise FileNotFoundError(f"Processed data not found. Tried: {path} and {candidates}")
 
 
 def _extract_data(data):
@@ -120,8 +119,7 @@ def train_and_save():
 		stats = _evaluate(y_test, y_pred, y_prob)
 		print(f"Model: {os.path.basename(path)} - Metrics: {stats}")
 
-		with open(path, "wb") as f:
-			pickle.dump(model, f)
+		save_model(model, path)
 
 	print("All done. Models saved to:")
 	for p in models:

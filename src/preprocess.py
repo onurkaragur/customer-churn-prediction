@@ -1,10 +1,10 @@
 import pandas as pd
-import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from config import DATA_PROCESSED, PREPROCESSOR
+from utils import save_pickle
 
 def preprocess(df):
     # Feature/Target
@@ -34,7 +34,7 @@ def preprocess(df):
         "y_test": y_test,
     }
 
-    pickle.dump(output, open(DATA_PROCESSED, "wb"))
-    pickle.dump(preprocessor, open(PREPROCESSOR, "wb"))
+    save_pickle(output, DATA_PROCESSED)
+    save_pickle(preprocessor, PREPROCESSOR)
 
     return output, preprocessor
